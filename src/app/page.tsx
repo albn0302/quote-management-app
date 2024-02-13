@@ -1,113 +1,200 @@
-import Image from "next/image";
+import {
+  getData,
+  saveData,
+  updateData,
+  deleteData,
+} from "@/utilities/handleDatabase";
+import Link from "next/link";
+import { revalidateTag } from "next/cache";
 
-export default function Home() {
+export default async function Home() {
+  const data = await getData();
+
+  const createQuote = async (formData: FormData) => {
+    "use server";
+    const quote = formData.get("quote") as string;
+    const author = formData.get("author") as string;
+    const data = await saveData(quote, author);
+    console.log(data);
+    revalidateTag("quote");
+  };
+
+  const updateQuote = async (formData: FormData) => {
+    "use server";
+    const quote = formData.get("quote") as string;
+    const author = formData.get("author") as string;
+    const id = formData.get("id") as string;
+    const data = await updateData(id, author, quote);
+    console.log(data);
+    revalidateTag("quote");
+  };
+
+  const deleteQuote = async (formData: FormData) => {
+    "use server";
+    const id = formData.get("id") as string;
+    const data = await deleteData(id);
+    console.log(data);
+    revalidateTag("quote");
+  };
+  console.log(data);
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+    <>
+      {/* Navbar */}
+      <nav className="sticky top-0 w-full py-4 backdrop-blur-md bg-slate-200/75 border-b border-slate-300 shadow-sm">
+        <div className="flex flex-row ml-3">
+          <h1 className="absolute text-3xl font-semibold text-sky-500 shadow-sm">
+            Q.M.A
+          </h1>
         </div>
+        <ul className="flex flex-row justify-end gap-x-3">
+          <li>
+            <Link className="mr-4" href={"/about"}>
+              <button className="px-4 py-2 bg-sky-500 text-white rounded-3xl transition ease-out hover:bg-sky-600 active:bg-sky-500 focus:outline-none focus:ring focus:ring-sky-200">
+                About
+              </button>
+            </Link>
+          </li>
+          <li>
+            <Link className="mr-4" href={"/login"}>
+              <button className="px-4 py-2 bg-sky-500 text-white rounded-3xl transition ease-out hover:bg-sky-600 active:bg-sky-500 focus:outline-none focus:ring focus:ring-sky-200">
+                Log In
+              </button>
+            </Link>
+          </li>
+          <li>
+            <Link className="mr-4" href={"/signup"}>
+              <button className="px-4 py-2 bg-sky-500 text-white rounded-3xl transition ease-out hover:bg-sky-600 active:bg-sky-500 focus:outline-none focus:ring focus:ring-sky-200">
+                Sign Up
+              </button>
+            </Link>
+          </li>
+          <div className="absolute mr-2 h-9 w-0.5 bg-slate-300 rounded-3xl"></div>
+        </ul>
+      </nav>
+      <div>
+        {/* Forms */}
+        <header className="flex justify-center my-5">
+          <h2 className="bg-slate-200 py-1 px-4 shadow-sm rounded-3xl">
+            Create Quote
+          </h2>
+        </header>
+        <form className="flex justify-center gap-2 my-2" action={createQuote}>
+          <input
+            className="mt-1 px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400
+            transition ease-out focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
+            disabled:bg-slate-50 disabled:text-slate-500 disabled:border-slate-200 disabled:shadow-none
+            invalid:border-pink-500 invalid:text-pink-600
+            focus:invalid:border-pink-500 focus:invalid:ring-pink-500"
+            type="text"
+            name="author"
+            placeholder="Author"
+          />
+          <input
+            className="mt-1 px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400
+            transition ease-out focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
+            disabled:bg-slate-50 disabled:text-slate-500 disabled:border-slate-200 disabled:shadow-none
+            invalid:border-pink-500 invalid:text-pink-600
+            focus:invalid:border-pink-500 focus:invalid:ring-pink-500"
+            type="text"
+            name="quote"
+            placeholder="Quote"
+          />
+          <button className="px-4 py-2 bg-sky-500 text-white rounded-3xl transition ease-out hover:bg-sky-600 active:bg-sky-500 focus:outline-none focus:ring focus:ring-sky-200">
+            Create
+          </button>
+        </form>
+        <header className="flex justify-center my-5">
+          <h2 className="bg-slate-200 py-1 px-4 shadow-sm rounded-3xl">
+            Delete Quote
+          </h2>
+        </header>
+        <form className="flex justify-center gap-2 my-2" action={deleteQuote}>
+          <input
+            className="mt-1 px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400
+            transition ease-out focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
+            disabled:bg-slate-50 disabled:text-slate-500 disabled:border-slate-200 disabled:shadow-none
+            invalid:border-pink-500 invalid:text-pink-600
+            focus:invalid:border-pink-500 focus:invalid:ring-pink-500"
+            type="number"
+            name="id"
+            placeholder="Id"
+          />
+          <button className="px-4 py-2 bg-red-500 text-white rounded-3xl transition ease-out hover:bg-red-600 active:bg-red-500 focus:outline-none focus:ring focus:ring-red-200">
+            Delete
+          </button>
+        </form>
+        <header className="flex justify-center my-5">
+          <h2 className="bg-slate-200 py-1 px-4 shadow-sm rounded-3xl">
+            Update Quote
+          </h2>
+        </header>
+        <form className="flex justify-center gap-x-2 my-2" action={updateQuote}>
+          <input
+            className="mt-1 px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400
+            transition ease-out focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
+            disabled:bg-slate-50 disabled:text-slate-500 disabled:border-slate-200 disabled:shadow-none
+            invalid:border-pink-500 invalid:text-pink-600
+            focus:invalid:border-pink-500 focus:invalid:ring-pink-500"
+            type="number"
+            name="id"
+            placeholder="Id"
+          />
+          <input
+            className="mt-1 px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400
+            transition ease-out focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
+            disabled:bg-slate-50 disabled:text-slate-500 disabled:border-slate-200 disabled:shadow-none
+            invalid:border-pink-500 invalid:text-pink-600
+            focus:invalid:border-pink-500 focus:invalid:ring-pink-500"
+            type="text"
+            name="author"
+            placeholder="Author"
+          />
+          <input
+            className="mt-1 px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400
+            transition ease-out focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
+            disabled:bg-slate-50 disabled:text-slate-500 disabled:border-slate-200 disabled:shadow-none
+            invalid:border-pink-500 invalid:text-pink-600
+            focus:invalid:border-pink-500 focus:invalid:ring-pink-500"
+            type="text"
+            name="quote"
+            placeholder="Quote"
+          />
+          <button className="px-4 py-2 bg-yellow-500 text-white rounded-3xl transition ease-out hover:bg-yellow-600 active:bg-yellow-500 focus:outline-none focus:ring focus:ring-yellow-200">
+            Update
+          </button>
+        </form>
       </div>
-
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-full sm:before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-full sm:after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px] z-[-1]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Explore starter templates for Next.js.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50 text-balance`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
+      {/* Table */}
+      <table className="mt-10 mx-2 table-auto w-[99%]">
+        <thead>
+          <tr className="bg-sky-500">
+            <th className="border border-sky-600 text-white">Id</th>
+            <th className="border border-sky-600 text-white">Author</th>
+            <th className="border border-sky-600 text-white">Quote</th>
+          </tr>
+        </thead>
+        <tbody>
+          {data.map((q) => (
+            <tr key={q.id} className="bg-slate-100">
+              <td className="border border-slate-300">{q.id}</td>
+              <td className="border border-slate-300">{q.author}</td>
+              <td className="border border-slate-300">{q.quote}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <section className="flex justify-center items-center my-16">
+        <h1 className="text-slate-200 text-8xl w-6/12">
+          This is the end of this page...
+        </h1>
+      </section>
+      {/* Bottom */}
+      <nav className="bottom-0 w-full py-4 backdrop-blur-md bg-slate-200/75 border-t border-slate-300">
+        <div>
+          <p className="ml-3 text-slate-300">Made by: albn_johanssn</p>
+        </div>
+      </nav>
+    </>
   );
 }
